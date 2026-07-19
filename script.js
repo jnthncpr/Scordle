@@ -152,6 +152,7 @@
       won: false,
       hardMode: preferredHardMode(),
       dateKey: todayKey(),
+      submitting: false,
     };
   }
 
@@ -160,9 +161,25 @@
     saveJSON("scordle-daily-state", state);
   }
 
+  function isValidDailyState(saved) {
+    return (
+      Array.isArray(saved.guesses) &&
+      Array.isArray(saved.statusesHistory) &&
+      saved.guesses.length === saved.statusesHistory.length &&
+      saved.currentRow === saved.guesses.length &&
+      saved.guesses.every((g) => typeof g === "string" && g.length === WORD_LENGTH)
+    );
+  }
+
   function loadDailyStateIfValid() {
     const saved = loadJSON("scordle-daily-state", null);
-    if (saved && saved.dateKey === todayKey() && saved.answer === dailyAnswer()) {
+    if (
+      saved &&
+      saved.dateKey === todayKey() &&
+      saved.answer === dailyAnswer() &&
+      isValidDailyState(saved)
+    ) {
+      saved.submitting = false;
       return saved;
     }
     return null;
@@ -438,6 +455,7 @@
   }
 
   function submitGuess() {
+    if (state.submitting || state.gameOver) return;
     if (state.currentGuess.length < WORD_LENGTH) {
       showToast("Not enough letters");
       shakeRow(state.currentRow);
@@ -460,30 +478,35 @@
     const points = scoreGuess(guess, statuses);
     const gained = points.reduce((a, b) => a + b, 0);
 
+    // Advance the data model synchronously so a second Enter press (e.g. a
+    // mobile double-tap) can't resubmit this guess while the reveal animation
+    // for it is still running.
     const row = state.currentRow;
     state.guesses.push(guess);
     state.statusesHistory.push(statuses);
+    state.currentGuess = "";
+    state.currentRow += 1;
 
+    const won = guess === state.answer;
+    if (won) {
+      state.gameOver = true;
+      state.won = true;
+    } else if (state.currentRow >= MAX_GUESSES) {
+      state.gameOver = true;
+      state.won = false;
+    }
+
+    saveDailyState();
+    renderScore(false);
+    if (!state.gameOver) renderCurrentRow();
+
+    state.submitting = true;
     flipRow(row, guess, statuses, () => {
+      state.submitting = false;
       state.score += gained;
       renderScore(true);
       spawnScorePops(row, points, statuses);
       renderKeyboardStatuses();
-
-      const won = guess === state.answer;
-      state.currentGuess = "";
-      state.currentRow += 1;
-
-      if (won) {
-        state.gameOver = true;
-        state.won = true;
-      } else if (state.currentRow >= MAX_GUESSES) {
-        state.gameOver = true;
-        state.won = false;
-      } else {
-        renderCurrentRow();
-      }
-
       saveDailyState();
 
       if (state.gameOver) {
