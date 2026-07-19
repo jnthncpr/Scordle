@@ -65,6 +65,10 @@ html, body {
   height: 100%;
 }
 
+button {
+  touch-action: manipulation;
+}
+
 body {
   font-family: "Helvetica Neue", Arial, "Segoe UI", sans-serif;
   background: var(--color-bg);
