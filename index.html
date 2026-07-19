@@ -25,6 +25,9 @@
     <button class="icon-btn" id="stats-btn" aria-label="Statistics">
       <svg viewBox="0 0 24 24"><rect x="3" y="12" width="4" height="9" fill="currentColor"/><rect x="10" y="6" width="4" height="15" fill="currentColor"/><rect x="17" y="2" width="4" height="19" fill="currentColor"/></svg>
     </button>
+    <button class="icon-btn" id="settings-btn" aria-label="Settings">
+      <svg viewBox="0 0 24 24"><path fill="currentColor" d="M19.14 12.94a7.14 7.14 0 0 0 .06-.94 7.14 7.14 0 0 0-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.03 7.03 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.71 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.04.3-.06.62-.06.94s.02.64.06.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.42.32.6.22l2.39-.96c.49.38 1.03.7 1.62.94l.36 2.54a.5.5 0 0 0 .5.42h3.84a.5.5 0 0 0 .5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.24.1.48 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z"/></svg>
+    </button>
     <button class="icon-btn" id="theme-btn" aria-label="Toggle dark mode">
       <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.4 5.4 0 0 1-7.54-7.54A9 9 0 0 0 12 3z"/></svg>
     </button>
@@ -40,6 +43,7 @@
     <span class="score-label">Guess</span>
     <span class="score-value" id="guess-count">1<span class="of6">/6</span></span>
   </div>
+  <span class="hard-badge" id="hard-badge" hidden>HARD</span>
 </div>
 
 <main>
@@ -49,6 +53,24 @@
 <div id="toast-container" class="toast-container" aria-live="assertive"></div>
 
 <div class="keyboard" id="keyboard"></div>
+
+<!-- Settings modal -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <button class="modal-close" data-close="settings-modal" aria-label="Close">&times;</button>
+    <h2 id="settings-title">Settings</h2>
+    <div class="setting-row">
+      <div class="setting-text">
+        <span class="setting-name">Hard Mode</span>
+        <span class="setting-desc">Any revealed hints must be used in later guesses: green letters stay locked in their spot, and yellow letters must appear somewhere.</span>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="hardmode-toggle" />
+        <span class="switch-track"><span class="switch-thumb"></span></span>
+      </label>
+    </div>
+  </div>
+</div>
 
 <!-- Rules / How to score modal -->
 <div class="modal-overlay" id="rules-modal">
@@ -93,6 +115,7 @@
       <li><span class="pill gray">GRAY +0</span> always.</li>
     </ul>
     <p class="strategy-tip">💡 <strong>Strategy:</strong> Solving fast caps your score low. Once you know a letter's in the word, try it in a <em>different wrong spot</em> before you lock it in — every fresh yellow is another 5 points. You've only got 6 guesses, so don't wait too long to actually solve it!</p>
+    <p class="hard-mode-note">🔒 Turn on <strong>Hard Mode</strong> in Settings to force yourself to reuse every hint: greens must stay put and yellows must show up somewhere in the guess.</p>
   </div>
 </div>
 

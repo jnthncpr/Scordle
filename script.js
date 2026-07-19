@@ -23,6 +23,11 @@
   const finalScoreValue = document.getElementById("final-score-value");
   const shareBtn = document.getElementById("share-btn");
   const playAgainBtn = document.getElementById("play-again-btn");
+  const settingsBtn = document.getElementById("settings-btn");
+  const hardModeToggle = document.getElementById("hardmode-toggle");
+  const hardBadge = document.getElementById("hard-badge");
+
+  const ORDINALS = ["1st", "2nd", "3rd", "4th", "5th"];
 
   // ---------- Utilities ----------
   function todayKey() {
@@ -128,6 +133,10 @@
   // ---------- Game state ----------
   let state = null; // set by startGame
 
+  function preferredHardMode() {
+    return localStorage.getItem("scordle-hardmode") === "true";
+  }
+
   function freshState(mode) {
     const answer = mode === "daily" ? dailyAnswer() : randomAnswer();
     return {
@@ -141,6 +150,7 @@
       scoredGreens: [],
       gameOver: false,
       won: false,
+      hardMode: preferredHardMode(),
       dateKey: todayKey(),
     };
   }
@@ -209,6 +219,56 @@
       }
     }
     return points;
+  }
+
+  // ---------- Hard mode ----------
+  function computeHardModeConstraints() {
+    const greenReq = {}; // position -> required letter
+    const minCounts = {}; // letter -> minimum required occurrences in the guess
+
+    state.guesses.forEach((guess, r) => {
+      const statuses = state.statusesHistory[r];
+      const countsThisGuess = {};
+      for (let i = 0; i < WORD_LENGTH; i++) {
+        const letter = guess[i];
+        const st = statuses[i];
+        if (st === "correct") {
+          greenReq[i] = letter;
+          countsThisGuess[letter] = (countsThisGuess[letter] || 0) + 1;
+        } else if (st === "present") {
+          countsThisGuess[letter] = (countsThisGuess[letter] || 0) + 1;
+        }
+      }
+      Object.keys(countsThisGuess).forEach((letter) => {
+        minCounts[letter] = Math.max(minCounts[letter] || 0, countsThisGuess[letter]);
+      });
+    });
+
+    return { greenReq, minCounts };
+  }
+
+  function checkHardMode(guess) {
+    if (!state.hardMode || state.guesses.length === 0) return null;
+    const { greenReq, minCounts } = computeHardModeConstraints();
+
+    for (const posKey of Object.keys(greenReq)) {
+      const pos = Number(posKey);
+      if (guess[pos] !== greenReq[pos]) {
+        return `${ORDINALS[pos]} letter must be ${greenReq[pos].toUpperCase()}`;
+      }
+    }
+
+    const guessCounts = {};
+    guess.split("").forEach((c) => {
+      guessCounts[c] = (guessCounts[c] || 0) + 1;
+    });
+    for (const letter of Object.keys(minCounts)) {
+      if ((guessCounts[letter] || 0) < minCounts[letter]) {
+        return `Guess must contain ${letter.toUpperCase()}`;
+      }
+    }
+
+    return null;
   }
 
   // ---------- Board rendering ----------
@@ -287,6 +347,10 @@
     modePracticeBtn.setAttribute("aria-selected", state.mode === "practice");
   }
 
+  function renderHardBadge() {
+    hardBadge.hidden = !state.hardMode;
+  }
+
   function renderAll() {
     buildBoard();
     renderCompletedRows();
@@ -294,6 +358,7 @@
     renderKeyboardStatuses();
     renderScore(false);
     updateModeUI();
+    renderHardBadge();
     if (state.gameOver) {
       // reflect final state without popping the modal automatically on reload
     }
@@ -380,6 +445,12 @@
     }
     if (!DICTIONARY.has(state.currentGuess)) {
       showToast("Not in word list");
+      shakeRow(state.currentRow);
+      return;
+    }
+    const hardModeError = checkHardMode(state.currentGuess);
+    if (hardModeError) {
+      showToast(hardModeError);
       shakeRow(state.currentRow);
       return;
     }
@@ -537,6 +608,16 @@
   statsBtn.addEventListener("click", () => {
     renderStats();
     openModal("stats-modal");
+  });
+  settingsBtn.addEventListener("click", () => {
+    hardModeToggle.checked = state.hardMode;
+    openModal("settings-modal");
+  });
+  hardModeToggle.addEventListener("change", () => {
+    state.hardMode = hardModeToggle.checked;
+    localStorage.setItem("scordle-hardmode", String(hardModeToggle.checked));
+    renderHardBadge();
+    saveDailyState();
   });
 
   // ---------- Stats rendering ----------
