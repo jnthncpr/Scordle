@@ -82,24 +82,27 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 16px;
+  padding: clamp(6px, 2.5vw, 10px) clamp(8px, 3.5vw, 16px);
   border-bottom: 1px solid var(--color-border);
-  gap: 8px;
+  gap: clamp(3px, 1.5vw, 8px);
 }
 
 .app-title {
-  font-size: 1.9rem;
+  font-size: clamp(1.05rem, 5.2vw, 1.9rem);
   font-weight: 800;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.03em;
   margin: 0;
   text-align: center;
   flex: 1;
+  min-width: 0;
+  white-space: nowrap;
 }
 
 .header-right {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: clamp(2px, 1.2vw, 6px);
+  flex-shrink: 0;
 }
 
 .icon-btn {
@@ -107,13 +110,14 @@ body {
   border: none;
   cursor: pointer;
   color: var(--color-text);
-  width: 34px;
-  height: 34px;
-  padding: 6px;
+  width: clamp(26px, 7.5vw, 34px);
+  height: clamp(26px, 7.5vw, 34px);
+  padding: clamp(3px, 1.2vw, 6px);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .icon-btn:hover {
@@ -121,8 +125,8 @@ body {
 }
 
 .icon-btn svg {
-  width: 22px;
-  height: 22px;
+  width: clamp(15px, 4.5vw, 22px);
+  height: clamp(15px, 4.5vw, 22px);
 }
 
 .mode-toggle {
@@ -130,17 +134,19 @@ body {
   border: 1px solid var(--color-border);
   border-radius: 999px;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .mode-btn {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 5px 10px;
-  font-size: 0.72rem;
+  padding: clamp(3px, 1vw, 5px) clamp(5px, 2vw, 10px);
+  font-size: clamp(0.56rem, 2.4vw, 0.72rem);
   font-weight: 700;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
   color: var(--color-text);
+  white-space: nowrap;
 }
 
 .mode-btn.active {
@@ -727,7 +733,5 @@ hr {
 }
 
 @media (max-width: 380px) {
-  .app-title { font-size: 1.5rem; }
-  .mode-btn { padding: 4px 7px; font-size: 0.62rem; }
   .tile { font-size: 1.6rem; }
 }
